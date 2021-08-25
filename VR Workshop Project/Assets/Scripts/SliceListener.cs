@@ -7,13 +7,15 @@ public class SliceListener : MonoBehaviour
     public Slicer slicer;
 
     public BoxCollider cutter;
-    public sawEmulator saw;
+    public SawEmu2 saw;
 
     private void OnTriggerEnter(Collider other)
     {
-        if(saw.getCutting())
+        if (saw.ValidCut() && other.gameObject.layer == 6)
         {
+            Debug.Log("Heres a cut");
             slicer.isTouched = true;
+            saw.SetSawLock();
         }
     }
 }

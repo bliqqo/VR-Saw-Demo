@@ -288,7 +288,8 @@ Transform:
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
-  m_Children: []
+  m_Children:
+  - {fileID: 1613981363}
   m_Father: {fileID: 4184354188035578885}
   m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -306,7 +307,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   slicer: {fileID: 1140055700309003433}
   cutter: {fileID: 235168642}
-  saw: {fileID: 4187353191903611444}
+  saw: {fileID: 4187353191903611443}
 --- !u!54 &235168641
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -334,8 +335,8 @@ BoxCollider:
   m_IsTrigger: 1
   m_Enabled: 1
   serializedVersion: 2
-  m_Size: {x: 0, y: 0.02, z: 0.72}
-  m_Center: {x: 0, y: -0.13, z: 0.53}
+  m_Size: {x: 0, y: 0, z: 1.02}
+  m_Center: {x: 0, y: -0.13, z: 0.77}
 --- !u!1 &408153620
 GameObject:
   m_ObjectHideFlags: 0
@@ -797,6 +798,36 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 20dcbe27b336e94479d558e57615be15, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!1 &1613981362
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1613981363}
+  m_Layer: 7
+  m_Name: PositionBackUp
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1613981363
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1613981362}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -0, y: -0.39, z: 1.157}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 235168639}
+  m_RootOrder: 0
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1899216225
 GameObject:
   m_ObjectHideFlags: 0
@@ -1027,7 +1058,7 @@ MonoBehaviour:
   sliceMask:
     serializedVersion: 2
     m_Bits: 64
-  saw: {fileID: 4187353191903611444}
+  saw: {fileID: 4187353191903611443}
   isTouched: 0
 --- !u!54 &1140055700309003434
 Rigidbody:
@@ -3012,7 +3043,7 @@ GameObject:
   - component: {fileID: 4201379515544584687}
   - component: {fileID: 4187353191903611442}
   - component: {fileID: 2075205734303650304}
-  - component: {fileID: 4187353191903611444}
+  - component: {fileID: 4187353191903611443}
   - component: {fileID: 4187353191903611445}
   - component: {fileID: 4187353191903611446}
   m_Layer: 8
@@ -3038,7 +3069,7 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 0
   m_CollisionDetection: 0
---- !u!114 &4187353191903611444
+--- !u!114 &4187353191903611443
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -3047,15 +3078,20 @@ MonoBehaviour:
   m_GameObject: {fileID: 4187353191903611441}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 16224d872f89b5942982fa8d06545970, type: 3}
+  m_Script: {fileID: 11500000, guid: 981f8956e6ba9de489e4e7dca02bf449, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  SRLimit: 0.25
   rb: {fileID: 4187353191903611442}
   trigger: {fileID: 2075205734303650304}
   physic: {fileID: 4187353191903611445}
-  breakforce: 0.25
-  triggerWait: 1
-  handvel: {fileID: 1409482590}
+  Joint: {fileID: 4187353191903611446}
+  WoodBackup: {fileID: 1613981362}
+  hand: {fileID: 4188341106771607059}
+  ForcePush: 5
+  TooLowValue: 0.6
+  ReduceYby: 5
+  breakforce: 0.1
 --- !u!65 &4187353191903611445
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -3682,7 +3718,7 @@ MonoBehaviour:
   virtualGreenScreenApplyDepthCulling: 0
   virtualGreenScreenDepthTolerance: 0.2
   mrcActivationMode: 0
-  _trackingOriginType: 1
+  _trackingOriginType: 0
   usePositionTracking: 1
   useRotationTracking: 1
   useIPDInPositionTracking: 1
@@ -6711,7 +6747,7 @@ Transform:
   m_GameObject: {fileID: 1140055700309003432}
   m_LocalRotation: {x: 0.5, y: -0.5, z: 0.5, w: 0.5}
   m_LocalPosition: {x: -0, y: 0.227, z: 0.77}
-  m_LocalScale: {x: 0.23817235, y: 0.26142457, z: 0.20575874}
+  m_LocalScale: {x: 0.22614707, y: 0.26142457, z: 0.18631403}
   m_Children: []
   m_Father: {fileID: 4184354188035578885}
   m_RootOrder: 0

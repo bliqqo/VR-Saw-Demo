@@ -23,9 +23,16 @@ public class sawEmulator : MonoBehaviour
     //Variables storing other GameObject Scripts.
     public RbVelocity handvel;
 
+    private Collider ColliderMemory;
 
+    private bool checkMakePhysical = false;
+    private float MakePhysicalTimer = 0;
+    public float MakePhrsicalWait;
 
+    public float TooLowValue;
+    public float ReduceYby;
 
+    private float DebugVel;
 
     void Update()
     {
@@ -40,19 +47,36 @@ public class sawEmulator : MonoBehaviour
             }
             else triggerCounter += Time.deltaTime;
         }
+
+        if (checkMakePhysical)
+        {
+            if (MakePhysicalTimer >= MakePhrsicalWait)
+            {
+                MakePhysicalTimer = 0;
+                physic.enabled = true;
+                checkMakePhysical = false;
+            }
+            else MakePhysicalTimer += Time.deltaTime;
+        }
+        
     }
 
     private void OnTriggerExit(Collider Other)
     {
+        Debug.Log("trigger exit");
         iscutting = false;
+        if (ColliderMemory = Other) physic.enabled = true;
         JustCut();
     }
 
     // saw hovering over board
-    private void OnTriggerStay(Collider other)
+    private void OnCollisionStay(Collision collision)
     {
-        if (other.gameObject.layer == 6)
+        Debug.Log("1: CollisionStay");
+        if (collision.collider.gameObject.layer == 6)
         {
+            Debug.Log("2: Correct Layer");
+            ColliderMemory = collision.collider;
             float yVel;
 
             Vector3 localVelocity = transform.InverseTransformDirection(rb.velocity);
@@ -60,22 +84,27 @@ public class sawEmulator : MonoBehaviour
             //if escaped "saw lock"
             if (GetBreakforce())
             {
+                Debug.Log("3: They are Pulling up (past breakforce)");
                 //iscutting = false;
-                yVel = 0;
+                yVel = PullBackSaw(collision);
                 rb.constraints = RigidbodyConstraints.None;
-                physic.enabled = true;
                 setCheckTrigger();
             }
             //if not
             else
             {
+                Debug.Log("3: They are sawing");
                 iscutting = true;
-                yVel = -(Mathf.Abs(localVelocity.x / 2f));
+                yVel = -(Mathf.Abs(localVelocity.x / ReduceYby));
 
                 freezeRbLocally = true;
                 rb.constraints = RigidbodyConstraints.FreezeRotationY | RigidbodyConstraints.FreezeRotationZ;
 
-                if (yVel > -0.0075) physic.enabled = true;
+                if (yVel > TooLowValue && physic.enabled == false)
+                {
+                    Debug.Log("3.5: they are arent trying/ speed too low: " + yVel);
+                    yVel = PullBackSaw(collision);
+                }
                 else physic.enabled = false;
             }
  
@@ -90,6 +119,8 @@ public class sawEmulator : MonoBehaviour
     //retreaves data relevant to breaking "saw lock"
     public bool GetBreakforce()
     {
+        Debug.Log("2.5: Velocity: " + handvel.getVelocity().y + " >=  Breakforce: " + breakforce + " so : " + (handvel.getVelocity().y >= breakforce));
+        DebugVel = handvel.getVelocity().y;
         if (handvel.getVelocity().y >= breakforce)
         {
             return true;
@@ -98,11 +129,21 @@ public class sawEmulator : MonoBehaviour
         return false;
     }
 
+
+    public float PullBackSaw(Collision col)
+    {
+        Debug.Log("Pulling back saw ");
+        var dir = col.contacts[0].point - gameObject.transform.position;
+        dir = -dir.normalized;
+        checkMakePhysical = true;
+        return dir.y;
+    }
     //Getters, and closers
 
 
     public void setCheckTrigger()
     {
+
         iscutting = false;
         triggerCounter = 0;
         rb.constraints = RigidbodyConstraints.None;
@@ -125,3 +166,9 @@ public class sawEmulator : MonoBehaviour
         setCheckTrigger();
     }
 }
+
+
+//Ideas:
+
+//change to on collision stay instead of trigger (see if it works)
+//    if so use collision and calculate a force away from the wood

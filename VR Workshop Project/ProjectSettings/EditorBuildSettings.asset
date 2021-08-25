@@ -6,11 +6,11 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 0
-    path: Assets/cutting saw.unity
-    guid: b1cb92a4ec5d2124196293b5d5170fe9
-  - enabled: 1
-    path: Assets/Something.unity
-    guid: 5b85cffa957f20f4c9ec510e8032c8c9
+    path: 
+    guid: 00000000000000000000000000000000
+  - enabled: 0
+    path: 
+    guid: 00000000000000000000000000000000
   m_configObjects:
     Unity.XR.Oculus.Settings: {fileID: 11400000, guid: 56dfb39961983ae4a8f6257c32ca52ef, type: 2}
     com.unity.xr.management.loader_settings: {fileID: 11400000, guid: 2f9b1cbabeea02847a2067130ad85be8, type: 2}

@@ -9,51 +9,64 @@ public class Slicer : MonoBehaviour
     public LayerMask sliceMask;
 
     //Other Gameobject Script Variable
-    public sawEmulator saw;
+    public SawEmu2 saw;
 
     //if listener triggered
     public bool isTouched;
 
+    private float Timer = 0;
+
     private void Update()
     {
+        //If ready to make a slice
         if (isTouched == true)
         {
             isTouched = false;
-
+            Debug.Log("here i am not doing my job -1");
             //Gather Objects and Split them into 2 halfs from Slice plane
             Collider[] objectsToBeSliced = Physics.OverlapBox(transform.position, new Vector3(1, 0.1f, 0.1f), transform.rotation, sliceMask);
             foreach (Collider objectToBeSliced in objectsToBeSliced)
             {
-
-                SlicedHull slicedObject = SliceObject(objectToBeSliced.gameObject, MaterialAfterSlice);
-
-                GameObject upperHullGameobject = slicedObject.CreateUpperHull(objectToBeSliced.gameObject, MaterialAfterSlice);
-                GameObject lowerHullGameobject = slicedObject.CreateLowerHull(objectToBeSliced.gameObject, MaterialAfterSlice);
-
-
-                upperHullGameobject.transform.position = objectToBeSliced.transform.position;
-                lowerHullGameobject.transform.position = objectToBeSliced.transform.position;
+                try
+                {
+                    Debug.Log("here i am not doing my job -2");
+                    SlicedHull slicedObject = SliceObject(objectToBeSliced.gameObject, MaterialAfterSlice);
 
 
-                MakePhysical(upperHullGameobject);
-                MakePhysical(lowerHullGameobject);
 
-                //destroys original gameobject
-                Destroy(objectToBeSliced.gameObject);
+                    GameObject upperHullGameobject = slicedObject.CreateUpperHull(objectToBeSliced.gameObject, MaterialAfterSlice) ?? null;
+                    GameObject lowerHullGameobject = slicedObject.CreateLowerHull(objectToBeSliced.gameObject, MaterialAfterSlice) ?? null;
 
-                //notifies saw to stop
-                saw.JustCut();
+
+                    upperHullGameobject.transform.position = objectToBeSliced.transform.position;
+                    lowerHullGameobject.transform.position = objectToBeSliced.transform.position;
+
+
+                    MakePhysical(upperHullGameobject);
+                    MakePhysical(lowerHullGameobject);
+
+                    //destroys original gameobject
+                    Destroy(objectToBeSliced.gameObject);
+
+                }
+                catch
+                {
+                    continue;
+                }
             }
         }
+        
 
     }
+
+
 
     //Creates the halfs of original object and the important components
     private void MakePhysical(GameObject obj)
     {
         obj.AddComponent<MeshCollider>().convex = true;
         obj.AddComponent<Rigidbody>();
-        obj.layer = LayerMask.NameToLayer("Slicer");
+        obj.AddComponent<AddToLayerDelay>();
     }
 
 

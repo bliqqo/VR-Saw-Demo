@@ -24,7 +24,7 @@ namespace EzySlice {
         public GameObject CreateUpperHull(GameObject original, Material crossSectionMat) {
             GameObject newObject = CreateUpperHull();
 
-            if (newObject != null) {
+            if (newObject != null && original != null && crossSectionMat != null) {
                 newObject.transform.localPosition = original.transform.localPosition;
                 newObject.transform.localRotation = original.transform.localRotation;
                 newObject.transform.localScale = original.transform.localScale;

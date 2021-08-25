@@ -582,7 +582,7 @@ PlayerSettings:
   webGLThreadsSupport: 0
   webGLDecompressionFallback: 0
   scriptingDefineSymbols:
-    1: PROBUILDER_EXPERIMENTAL_FEATURES;RealtimeCSG;RealtimeCSG_1;RealtimeCSG_1_5;RealtimeCSG_1_5_62
+    1: 
     7: PROBUILDER_EXPERIMENTAL_FEATURES;RealtimeCSG;RealtimeCSG_1;RealtimeCSG_1_5;RealtimeCSG_1_5_62
     13: PROBUILDER_EXPERIMENTAL_FEATURES;RealtimeCSG;RealtimeCSG_1;RealtimeCSG_1_5;RealtimeCSG_1_5_62
     14: PROBUILDER_EXPERIMENTAL_FEATURES;RealtimeCSG;RealtimeCSG_1;RealtimeCSG_1_5;RealtimeCSG_1_5_62
