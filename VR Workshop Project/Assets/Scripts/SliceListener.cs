@@ -15,7 +15,7 @@ public class SliceListener : MonoBehaviour
         {
             Debug.Log("Heres a cut");
             slicer.isTouched = true;
-            saw.SetSawLock();
+
         }
     }
 }

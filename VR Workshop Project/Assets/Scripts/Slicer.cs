@@ -21,38 +21,41 @@ public class Slicer : MonoBehaviour
         //If ready to make a slice
         if (isTouched == true)
         {
-            isTouched = false;
-            Debug.Log("here i am not doing my job -1");
+
             //Gather Objects and Split them into 2 halfs from Slice plane
             Collider[] objectsToBeSliced = Physics.OverlapBox(transform.position, new Vector3(1, 0.1f, 0.1f), transform.rotation, sliceMask);
             foreach (Collider objectToBeSliced in objectsToBeSliced)
             {
                 try
                 {
-                    Debug.Log("here i am not doing my job -2");
                     SlicedHull slicedObject = SliceObject(objectToBeSliced.gameObject, MaterialAfterSlice);
 
+                    Debug.Log("what an accomplishment");
 
-
-                    GameObject upperHullGameobject = slicedObject.CreateUpperHull(objectToBeSliced.gameObject, MaterialAfterSlice) ?? null;
-                    GameObject lowerHullGameobject = slicedObject.CreateLowerHull(objectToBeSliced.gameObject, MaterialAfterSlice) ?? null;
+                    GameObject upperHullGameobject = slicedObject.CreateUpperHull(objectToBeSliced.gameObject, MaterialAfterSlice);
+                    GameObject lowerHullGameobject = slicedObject.CreateLowerHull(objectToBeSliced.gameObject, MaterialAfterSlice);
 
 
                     upperHullGameobject.transform.position = objectToBeSliced.transform.position;
                     lowerHullGameobject.transform.position = objectToBeSliced.transform.position;
 
+                    Debug.Log("wowee");
 
                     MakePhysical(upperHullGameobject);
                     MakePhysical(lowerHullGameobject);
 
                     //destroys original gameobject
                     Destroy(objectToBeSliced.gameObject);
-
+                    saw.SetSawReset();
+                    saw.SawLock = false;
                 }
                 catch
                 {
                     continue;
                 }
+                    
+                
+                
             }
         }
         
