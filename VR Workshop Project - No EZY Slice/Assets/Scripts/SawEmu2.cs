@@ -8,6 +8,7 @@ public class SawEmu2 : MonoBehaviour
     public Slicer slicer;
     public SliceListener sliceListener;
 
+    //storage for Plane Set Up (sets up planes for slicing and cutting wood)
     public GameObject LeftPlane;
     public GameObject rightPlane;
     public GameObject SlicePlane;
@@ -58,6 +59,10 @@ public class SawEmu2 : MonoBehaviour
     private int TriggeredObjects = 0;
     private float localVelZ;
 
+    //Variables for interacting with Saw Listener (Trigger for cutting)
+    public bool isTouched;
+    public GameObject ToBeCut;
+
 
     void Start()
     {
@@ -87,8 +92,14 @@ public class SawEmu2 : MonoBehaviour
                 cuttimer += Time.deltaTime;
             }
             else cuttimer = 0;
-        }
-        
+
+            //If Slice Trigger Touched
+            if (isTouched)
+            {
+                SliceTheWood();
+            }
+
+        }        
     }
 
 
@@ -115,11 +126,10 @@ public class SawEmu2 : MonoBehaviour
             if (SawLock)
             {
                 //if not pulling away hand or slamming saw into plank
-                Debug.Log("2.5: Velocity: " + GetHandDistance() + " >=  Breakforce: " + breakforce + " so : " + (GetHandDistance() >= breakforce));
                 if (GetHandDistance() > breakforce || -rb.velocity.y > 1)
                 {
-                    Debug.Log("3: They are Pulling up (past breakforce)");
                     CallCutWood();
+
                     //reset sawlock
                     if (JDetach) RetachJoint();
                     SawLock = false;
@@ -127,7 +137,6 @@ public class SawEmu2 : MonoBehaviour
                 }
                 else
                 {
-                    Debug.Log("3: They are sawing");
                     Vector3 localVelocity = transform.InverseTransformDirection(rb.velocity);
 
                     var yVel = (Mathf.Abs(localVelocity.z / ReduceYby));
@@ -135,12 +144,12 @@ public class SawEmu2 : MonoBehaviour
                     //if they are keeping saw still on plank
                     if (Mathf.Abs(localVelocity.z) < TooLowValue)
                     {
-                        Debug.Log("3.5: not trying / speed too low: " + localVelocity.z);
                         yVel = -yVel * ForcePush;
                         rb.angularVelocity = rb.angularVelocity / 2;
                     }
 
                     localVelZ = localVelocity.z;
+
                     //set sawlocked velocity
                     localVelocity.y = yVel;
                     localVelocity.x = 0;
@@ -149,6 +158,31 @@ public class SawEmu2 : MonoBehaviour
                 }
             }
         }
+    }
+
+    private void SliceTheWood()
+    {
+        isTouched = false;
+        if (ToBeCut.gameObject.layer != 6) return;
+
+        var tranformNormal = ((Vector3)(ToBeCut.transform.localToWorldMatrix.transpose * SlicePlane.gameObject.transform.up)).normalized;
+
+        Vector3 transformedStartingPoint = ToBeCut.transform.InverseTransformPoint(SlicePlane.gameObject.transform.position);
+
+        Plane plane = new Plane(tranformNormal, transformedStartingPoint);
+
+        var direction = Vector3.Dot(Vector3.up, SlicePlane.gameObject.transform.up);
+
+        if (direction < 0)
+        {
+            plane = plane.flipped;
+        }
+
+        GameObject[] slices = SawCut.Slice(plane, ToBeCut);
+        Destroy(ToBeCut);
+
+        SetSawReset();
+        SawLock = false;
     }
 
     //Setter and things that need to be changed with lock
@@ -174,55 +208,66 @@ public class SawEmu2 : MonoBehaviour
     //(I accessed it though the sawEmu2 on a whim for testing and continued to work)
     public void CallCutWood()
     {
-        //Get Plane for Determining left or right of cut
+        //set up Plane for Determining leftside or Rightside of cut (based of position SliceCut GameObject [primitive plane])
         var tranformNormal = ((Vector3)(Wood.transform.localToWorldMatrix.transpose * SlicePlane.transform.up)).normalized;
         Vector3 transformedStartingPoint = Wood.gameObject.transform.InverseTransformPoint(SlicePlane.transform.position);
         Plane tempSlicePlane = new Plane(tranformNormal, transformedStartingPoint);
 
+        //Check and correct direction of plane
         float direction = Vector3.Dot(Vector3.up, SlicePlane.transform.up);
         if (direction < 0)
         {
             tempSlicePlane = tempSlicePlane.flipped;
         }
 
-        //Get Plane for determining the Leftwards edge of cut
+        //Set up Plane for determining the Leftwards edge of cut
         tranformNormal = ((Vector3)(Wood.transform.localToWorldMatrix.transpose * LeftPlane.transform.up)).normalized;
         transformedStartingPoint = Wood.gameObject.transform.InverseTransformPoint(LeftPlane.transform.position);
         Plane tempLeftPlane = new Plane(tranformNormal, transformedStartingPoint);
 
+        //Check and correct direction of plane
         direction = Vector3.Dot(Vector3.up, LeftPlane.transform.up);
         if (direction < 0)
         {
             tempLeftPlane = tempLeftPlane.flipped;
         }
 
-        //Get Plane for determining the Rightward edge of cut
+        //Set up Plane for determining the Rightward edge of cut
         tranformNormal = ((Vector3)(Wood.transform.localToWorldMatrix.transpose * rightPlane.transform.up)).normalized;
         transformedStartingPoint = Wood.gameObject.transform.InverseTransformPoint(rightPlane.transform.position);
         Plane tempRightPlane = new Plane(tranformNormal, transformedStartingPoint);
 
+        //Check and correct direction of plane
         direction = Vector3.Dot(Vector3.up, rightPlane.transform.up);
         if (direction < 0)
         {
             tempRightPlane = tempRightPlane.flipped;
         }
 
-        //GetPlane for determining the bottom edge of cut
+        //Set up Plane for determining the bottom edge of cut
         tranformNormal = ((Vector3)(Wood.transform.localToWorldMatrix.transpose * FloorPlane.transform.up)).normalized;
         transformedStartingPoint = Wood.gameObject.transform.InverseTransformPoint(FloorPlane.transform.position);
         Plane tempFloorPlane = new Plane(tranformNormal, transformedStartingPoint);
 
+        //Check and correct direction of plane
         direction = Vector3.Dot(Vector3.up, FloorPlane.transform.up);
         if (direction < 0)
         {
             tempFloorPlane = tempFloorPlane.flipped;
         }
 
-
-        Debug.Log("trying to cut");
-  
-        //Initiate cut
-        SawCut.cut(tempLeftPlane, tempRightPlane, tempSlicePlane, tempFloorPlane, Wood.gameObject);
+        try
+        {
+            //Cut the object
+            SawCut.cut(tempLeftPlane, tempRightPlane, tempSlicePlane, tempFloorPlane, Wood.gameObject);
+        }
+        catch
+        {
+            //If cannot cut
+            Debug.Log("Invalid Cut detected");
+        }
+        
+        //Reset Saw
         SetSawReset();
         SawLock = false;
     }
@@ -297,11 +342,8 @@ public class SawEmu2 : MonoBehaviour
 
     private void OnTriggerStay(Collider Other)
     {
-        Debug.Log("1: CollisionStay");
         if (Other.gameObject.layer == 6)
         {
-            Debug.Log("2: Correct Layer");
-
             //Saves reference of what the saw thinks it is interacting with for later usage
             Wood = Other.gameObject;
 
@@ -322,8 +364,6 @@ public class SawEmu2 : MonoBehaviour
 
     private void OnTriggerExit(Collider Other)
     {
-        Debug.Log("On Trigger Exit Collider: " + Other.gameObject.name + "TriggeredObjects number: " + TriggeredObjects);
-
         if (Other.gameObject.layer == 6)
         {
             //If it is leaving the save object it was inside

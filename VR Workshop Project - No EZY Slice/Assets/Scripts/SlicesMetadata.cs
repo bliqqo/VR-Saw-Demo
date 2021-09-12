@@ -9,7 +9,6 @@ using UnityEngine.UIElements;
 
 namespace Assets.Scripts 
 { 
-
     //The side of the mesh
     public enum MeshSide
     {
@@ -37,8 +36,6 @@ namespace Assets.Scripts
         private Mesh WoodMesh;
 
         private Ray edgeRay;
-
-
 
         public Mesh PosSideMesh
         {
@@ -68,7 +65,7 @@ namespace Assets.Scripts
             }
         }
 
-
+        //Constructor
         public SlicesMetadata(Plane plane, Mesh mesh)
         {
             PSTriangles = new List<int>();
@@ -118,9 +115,6 @@ namespace Assets.Scripts
             Vector3 TriangleVertexNormal3;
             bool TriangleVertex3Side;
 
-            Debug.Log("TempWoodTrianglesLength is " + TempWoodTriangles.Length);
-            Debug.Log("TempWoodUVsLength is " + TempWoodUVs.Length);
-
             //For each vertex in WoodMesh
             for (int i = 0; i < TempWoodTriangles.Length; i += 3)
             {
@@ -150,7 +144,7 @@ namespace Assets.Scripts
                 {
                     //Add the relevant triangle
                     MeshSide side = (TriangleVertex1Side) ? MeshSide.Positive : MeshSide.Negative;
-                    AddSideNormalAndUvs(side, TriangleVertex1, TriangleVertexNormal1, TriangleVertexUV1, TriangleVertex2, TriangleVertexNormal2, TriangleVertexUV2, TriangleVertex3, TriangleVertexNormal3, TriangleVertexUV3);
+                    AddTrianglesNormalsAndUvs(side, TriangleVertex1, TriangleVertexNormal1, TriangleVertexUV1, TriangleVertex2, TriangleVertexNormal2, TriangleVertexUV2, TriangleVertex3, TriangleVertexNormal3, TriangleVertexUV3);
                 }
                 else
                 {
@@ -171,11 +165,11 @@ namespace Assets.Scripts
                         intersection1 = GetRayPlaneIntersectionPointAndUv(TriangleVertex2, TriangleVertexUV2, TriangleVertex3, TriangleVertexUV3, out intersection1Uv);
                         intersection2 = GetRayPlaneIntersectionPointAndUv(TriangleVertex3, TriangleVertexUV3, TriangleVertex1, TriangleVertexUV1, out intersection2Uv);
 
-                        //Attempt to calculate Normals and UVs with interesection
-                        AddSideNormalAndUvs(side1, TriangleVertex1, null, TriangleVertexUV1, TriangleVertex2, null, TriangleVertexUV2, intersection1, null, intersection1Uv);
-                        AddSideNormalAndUvs(side1, TriangleVertex1, null, TriangleVertexUV1, intersection1, null, intersection1Uv, intersection2, null, intersection2Uv);
+                        //Add new triangles to correct mesh side
+                        AddTrianglesNormalsAndUvs(side1, TriangleVertex1, null, TriangleVertexUV1, TriangleVertex2, null, TriangleVertexUV2, intersection1, null, intersection1Uv);
+                        AddTrianglesNormalsAndUvs(side1, TriangleVertex1, null, TriangleVertexUV1, intersection1, null, intersection1Uv, intersection2, null, intersection2Uv);
 
-                        AddSideNormalAndUvs(side2, intersection1, null, intersection1Uv, TriangleVertex3, null, TriangleVertexUV3, intersection2, null, intersection2Uv);
+                        AddTrianglesNormalsAndUvs(side2, intersection1, null, intersection1Uv, TriangleVertex3, null, TriangleVertexUV3, intersection2, null, intersection2Uv);
 
                     }
                     //Vertex 1 and 3 are on the same side
@@ -185,23 +179,24 @@ namespace Assets.Scripts
                         intersection1 = GetRayPlaneIntersectionPointAndUv(TriangleVertex1, TriangleVertexUV1, TriangleVertex2, TriangleVertexUV2, out intersection1Uv);
                         intersection2 = GetRayPlaneIntersectionPointAndUv(TriangleVertex2, TriangleVertexUV2, TriangleVertex3, TriangleVertexUV3, out intersection2Uv);
 
-                        //Add the positive triangles
-                        AddSideNormalAndUvs(side1, TriangleVertex1, null, TriangleVertexUV1, intersection1, null, intersection1Uv, TriangleVertex3, null, TriangleVertexUV3);
-                        AddSideNormalAndUvs(side1, intersection1, null, intersection1Uv, intersection2, null, intersection2Uv, TriangleVertex3, null, TriangleVertexUV3);
+                        //Add new triangles to correct mesh side
+                        AddTrianglesNormalsAndUvs(side1, TriangleVertex1, null, TriangleVertexUV1, intersection1, null, intersection1Uv, TriangleVertex3, null, TriangleVertexUV3);
+                        AddTrianglesNormalsAndUvs(side1, intersection1, null, intersection1Uv, intersection2, null, intersection2Uv, TriangleVertex3, null, TriangleVertexUV3);
 
-                        AddSideNormalAndUvs(side2, intersection1, null, intersection1Uv, TriangleVertex2, null, TriangleVertexUV2, intersection2, null, intersection2Uv);
+                        AddTrianglesNormalsAndUvs(side2, intersection1, null, intersection1Uv, TriangleVertex2, null, TriangleVertexUV2, intersection2, null, intersection2Uv);
                     }
                     //Vertex 1 is alone
                     else
                     {
-                        //Cast a ray from v1 to v2 and from v1 to v3 to get the intersections                       
+                        //Cast a ray from v1 to v2 and from v1 to v3 to get the intersection points                       
                         intersection1 = GetRayPlaneIntersectionPointAndUv(TriangleVertex1, TriangleVertexUV1, TriangleVertex2, TriangleVertexUV2, out intersection1Uv);
                         intersection2 = GetRayPlaneIntersectionPointAndUv(TriangleVertex1, TriangleVertexUV1, TriangleVertex3, TriangleVertexUV3, out intersection2Uv);
 
-                        AddSideNormalAndUvs(side1, TriangleVertex1, null, TriangleVertexUV1, intersection1, null, intersection1Uv, intersection2, null, intersection2Uv);
+                        //Add new Triangles to correct mesh side
+                        AddTrianglesNormalsAndUvs(side1, TriangleVertex1, null, TriangleVertexUV1, intersection1, null, intersection1Uv, intersection2, null, intersection2Uv);
 
-                        AddSideNormalAndUvs(side2, intersection1, null, intersection1Uv, TriangleVertex2, null, TriangleVertexUV2, TriangleVertex3, null, TriangleVertexUV3);
-                        AddSideNormalAndUvs(side2, intersection1, null, intersection1Uv, TriangleVertex3, null, TriangleVertexUV3, intersection2, null, intersection2Uv);
+                        AddTrianglesNormalsAndUvs(side2, intersection1, null, intersection1Uv, TriangleVertex2, null, TriangleVertexUV2, TriangleVertex3, null, TriangleVertexUV3);
+                        AddTrianglesNormalsAndUvs(side2, intersection1, null, intersection1Uv, TriangleVertex3, null, TriangleVertexUV3, intersection2, null, intersection2Uv);
                     }
 
                     //Add the newly created points on the plane.
@@ -210,6 +205,7 @@ namespace Assets.Scripts
                 }
             }
 
+            //Create Cross Section for two objects
             JoinPointsAlongPlane();
 
         }
@@ -217,15 +213,19 @@ namespace Assets.Scripts
         // Find new Veretx Point by casting a ray to find the planes intersection between 2 vertices && calculate Uv
         private Vector3 GetRayPlaneIntersectionPointAndUv(Vector3 vertex1, Vector2 vertex1Uv, Vector3 vertex2, Vector2 vertex2Uv, out Vector2 uv)
         {
+            //Get Distance for Interpolating the UV
             float distance = GetDistanceRelativeToPlane(vertex1, vertex2, out Vector3 pointOfIntersection, out float MaxDistance);
+
+            //Interpolate UV
             uv = InterpolateUvs(vertex1Uv, vertex2Uv, distance, MaxDistance);
+
             return pointOfIntersection;
         }
 
-        /// Computes the distance from the slice plane
+        // Computes the distance from the slice plane
         private float GetDistanceRelativeToPlane(Vector3 vertex1, Vector3 vertex2, out Vector3 pointOfintersection, out float MaxDist)
         {
-
+            //set up raycast 
             edgeRay.origin = vertex1;
             edgeRay.direction = (vertex2 - vertex1).normalized;
             MaxDist = Vector3.Distance(vertex1, vertex2);
@@ -240,10 +240,7 @@ namespace Assets.Scripts
             }
 
             pointOfintersection = edgeRay.GetPoint(dist);
-                //Vector3 direction = vertex2 - vertex1;
-                //Ray ray = new Ray(vertex1, direction);
-                //SlicePlane.Raycast(ray, out float distance);
-                //pointOfintersection = ray.GetPoint(distance);
+
             return dist;
         }
 
@@ -251,16 +248,11 @@ namespace Assets.Scripts
         private Vector2 InterpolateUvs(Vector2 uv1, Vector2 uv2, float distance, float maxDist)
         {
             distance /= maxDist;
-            //Vector2 uv = Vector2.Lerp(uv1, uv2, distance);
-            Vector2 uv;
-
-            uv.x = Mathf.Lerp(uv1.x, uv2.x, distance);
-            uv.y = Mathf.Lerp(uv1.y, uv2.y, distance);
-            return uv;
+            return Vector2.Lerp(uv1, uv2, distance);
         }
 
-        /// Divide and add the triangles, normals, and uvs to array of data
-        private void AddSideNormalAndUvs(MeshSide side, Vector3 vertex1, Vector3? normal1, Vector2 uv1, Vector3 vertex2, Vector3? normal2, Vector2 uv2, Vector3 vertex3, Vector3? normal3, Vector2 uv3)
+        // Divide and add the triangles, normals, and uvs to array of data
+        private void AddTrianglesNormalsAndUvs(MeshSide side, Vector3 vertex1, Vector3? normal1, Vector2 uv1, Vector3 vertex2, Vector3? normal2, Vector2 uv2, Vector3 vertex3, Vector3? normal3, Vector2 uv3)
         {
             if (side == MeshSide.Positive)
             {
@@ -273,22 +265,27 @@ namespace Assets.Scripts
         }
 
 
-        /// Adds the vertices to the mesh  
+        // Adds the vertices to the mesh  
         private void AddTrianglesNormalsAndUvs(ref List<Vector3> vertices, ref List<int> triangles, ref List<Vector3> normals, ref List<Vector2> uvs, Vector3 vertex1, Vector3? normal1, Vector2 uv1, Vector3 vertex2, Vector3? normal2, Vector2 uv2, Vector3 vertex3, Vector3? normal3, Vector2 uv3)
         {
             ShiftTriangleIndices(ref triangles);
 
-          //Compute normal if needed
+            //Compute normal if needed
             if(normal1 == null) normal1 = ComputeNormal(vertex1, vertex2, vertex3);
 
+            //Add them to referenced Mesh
             AddVertNormalUv(ref vertices, ref normals, ref uvs, ref triangles, vertex1, (Vector3)normal1, uv1, 0);
 
+            //Compute normal if needed
             if (normal2 == null) normal2 = ComputeNormal(vertex2, vertex3, vertex1);
 
+            //Add them to referenced Mesh
             AddVertNormalUv(ref vertices, ref normals, ref uvs, ref triangles, vertex2, (Vector3)normal2, uv2, 1);
 
+            //Compute normal if needed
             if (normal3 == null) normal3 = ComputeNormal(vertex3, vertex1, vertex2);
 
+            //Add them to referenced Mesh
             AddVertNormalUv(ref vertices, ref normals, ref uvs, ref triangles, vertex3, (Vector3)normal3, uv3, 2);
         }
 
@@ -314,7 +311,7 @@ namespace Assets.Scripts
             triangles.Insert(num, num);
         }
 
-        /// Join the points along the plane to the Midpoint
+        // Join the points along the plane to the Midpoint (for creating cross section)
         private void JoinPointsAlongPlane()
         {
             Vector3 Mid = GetMidPoint(out float distance);
@@ -336,13 +333,13 @@ namespace Assets.Scripts
 
                 if (direction > 0)
                 {
-                    AddSideNormalAndUvs(MeshSide.Positive, Mid, -normal3, Vector2.zero, firstVertex, -normal3, Vector2.zero, secondVertex, -normal3, Vector2.zero);
-                    AddSideNormalAndUvs(MeshSide.Negative, Mid, normal3, Vector2.zero, secondVertex, normal3, Vector2.zero, firstVertex, normal3, Vector2.zero);
+                    AddTrianglesNormalsAndUvs(MeshSide.Positive, Mid, -normal3, Vector2.zero, firstVertex, -normal3, Vector2.zero, secondVertex, -normal3, Vector2.zero);
+                    AddTrianglesNormalsAndUvs(MeshSide.Negative, Mid, normal3, Vector2.zero, secondVertex, normal3, Vector2.zero, firstVertex, normal3, Vector2.zero);
                 }
                 else
                 {
-                    AddSideNormalAndUvs(MeshSide.Positive, Mid, normal3, Vector2.zero, secondVertex, normal3, Vector2.zero, firstVertex, normal3, Vector2.zero);
-                    AddSideNormalAndUvs(MeshSide.Negative, Mid, -normal3, Vector2.zero, firstVertex, -normal3, Vector2.zero, secondVertex, -normal3, Vector2.zero);
+                    AddTrianglesNormalsAndUvs(MeshSide.Positive, Mid, normal3, Vector2.zero, secondVertex, normal3, Vector2.zero, firstVertex, normal3, Vector2.zero);
+                    AddTrianglesNormalsAndUvs(MeshSide.Negative, Mid, -normal3, Vector2.zero, firstVertex, -normal3, Vector2.zero, secondVertex, -normal3, Vector2.zero);
                 }
             }
         }
@@ -356,6 +353,7 @@ namespace Assets.Scripts
                 Vector3 furthestPoint = Vector3.zero;
                 distance = 0f;
 
+                //For each point on cross section
                 foreach (Vector3 point in PointsOnPlane)
                 {
                     //Initialize furthest point with first point
@@ -418,24 +416,38 @@ namespace Assets.Scripts
     //SliceObject modified to edit(cut) part of mesh, rather than slicing it in two
     class ChipMetadata
     {
+        //List data for Mesh components
         private List<Vector3> Verticies;
         private List<int> Triangles;
         private List<Vector2> UVs;
         private List<Vector3> Normals;
 
+        //Mesh returned after cut
         private Mesh remainder;
 
+        //the original mesh of the object being cut
+        private Mesh WoodMesh;
+
+        //points on Left and right cross section of cut, respectivly 
         private readonly List<Vector3> PointsOnLeftPlane;
         private readonly List<Vector3> PointsOnRightPlane;
 
+        //plane for determining which side of cut the vertices are on (left or right)
         private Plane SlicPlane;
+
+        //plane for calculating intersection with left and right side of cut (cross section)
         private Plane LeftPlane;
         private Plane RightPlane;
+
+        //plane for calculating if points are below where the cut takes place
         private Plane FloorPlane;
 
-        private Mesh WoodMesh;
-
+        
+        //storage variable for raycast calculations
         private Ray edgeRay;
+
+        //Storage for the 2 vectors at the apex of the cut
+        private List<Vector3> CutCorners;
 
         //Remainder of mesh after cut
         public Mesh Remainder
@@ -461,6 +473,7 @@ namespace Assets.Scripts
 
             PointsOnLeftPlane = new List<Vector3>();
             PointsOnRightPlane = new List<Vector3>();
+            CutCorners = new List<Vector3>();
 
             SlicPlane = SlicePlane;
             LeftPlane = LeftP;
@@ -472,27 +485,9 @@ namespace Assets.Scripts
             ComputeNewMeshes();
         }
 
-        //Weither it is valid to cut the chip at this location ( do not need to cut when intersecting verticies [on edges])
-        public bool ValidChip()
-        {
-            int[] TempWoodTriangles = WoodMesh.triangles;
-            Vector3[] TempWoodVerts = WoodMesh.vertices;
-
-            //Test each verticy and if any inside slice return without cutting
-            for (int i = 0; i < TempWoodTriangles.Length; i += 3)
-            {
-                if (LeftPlane.GetSide(TempWoodVerts[TempWoodTriangles[i]]) && RightPlane.GetSide(TempWoodVerts[TempWoodTriangles[i]]))                  return false;
-                if (LeftPlane.GetSide(TempWoodVerts[TempWoodTriangles[i + 1]]) && RightPlane.GetSide(TempWoodVerts[TempWoodTriangles[i + 1]]))          return false;
-                if (LeftPlane.GetSide(TempWoodVerts[TempWoodTriangles[i + 2]]) && RightPlane.GetSide(TempWoodVerts[TempWoodTriangles[i + 2]]))            return false;
-            }
-            return true;
-        }
-
         // Compute the positive and negative meshes based on the plane intersection and mesh
         private void ComputeNewMeshes()
         {
-            if (!ValidChip()) return;
-
             //Temp MeshData
             int[] TempWoodTriangles = WoodMesh.triangles;
             Vector3[] TempWoodVerts = WoodMesh.vertices;
@@ -527,7 +522,6 @@ namespace Assets.Scripts
             //For each vertex in WoodMesh
             for (int i = 0; i < TempWoodTriangles.Length; i += 3)
             {
-                Debug.Log("index (i) is " + i);
                 //Assign Correct Vertex 1 Data
                 TriangleVertex1 = TempWoodVerts[TempWoodTriangles[i]];
                 TriVertex1Index = Array.IndexOf(TempWoodVerts, TriangleVertex1);
@@ -552,12 +546,12 @@ namespace Assets.Scripts
                 TriangleVertex3Side = SlicPlane.GetSide(TriangleVertex3);
                 TriangleVertex3below = FloorPlane.GetSide(TriangleVertex3);
 
-                //All vertex are on the same side or underneith the area being cut (leave these alone and add to mesh)
+                //All vertex are on the same side or underneith the area being cut (leave these alone and add to Remainder mesh)
                 if (TriangleVertex1Side == TriangleVertex2Side && TriangleVertex2Side == TriangleVertex3Side || !TriangleVertex1below && !TriangleVertex2below && !TriangleVertex3below)
                 {
 
                     MeshSide side1 = (TriangleVertex1Side) ? MeshSide.Positive : MeshSide.Negative;
-                    AddSideNormalAndUvs(TriangleVertex1, TriangleVertexNormal1, TriangleVertexUV1, TriangleVertex2, TriangleVertexNormal2, TriangleVertexUV2, TriangleVertex3, TriangleVertexNormal3, TriangleVertexUV3);
+                    AddTrianglesNormalsAndUvs(TriangleVertex1, TriangleVertexNormal1, TriangleVertexUV1, TriangleVertex2, TriangleVertexNormal2, TriangleVertexUV2, TriangleVertex3, TriangleVertexNormal3, TriangleVertexUV3);
                     continue;
                 }
                 else
@@ -575,13 +569,39 @@ namespace Assets.Scripts
 
                     Vector2 intersectionPointUV;
 
-                    MeshSide side1 = (TriangleVertex1Side) ? MeshSide.Positive : MeshSide.Negative;
-
-
-                    //Wiether the apex of slice is located within current triangle of mesh (needed for recalculating mesh around center)
+                    //Wiether the apex of slice is located within current triangle of mesh (needed for recalculating mesh around center, without slice)
                     bool VertexInsideTri = VertexInsideTriangle( false, TriangleVertex1, TriangleVertex2, TriangleVertex3, out Vector3 intersectionPoint);
 
+                    //storage for knowing if vertecies need to be recalculated based on their arrangement in the triangle (if vertex is inside)
                     bool SwapPoints = false;
+
+                    // Why it matters:
+                    //
+                    //                           /|  (point 2)
+                    //         (intersection 2) X |
+                    //                         /| |
+                    //                        / | |
+                    //      (intersection 1) X  | |
+                    //                      / \/  |
+                    //                     /(apex)|
+                    //                    /   /\  |
+                    //                   /   | |  |
+                    //         (point 1)-----X-X-- (point 3)
+                    //                       ^ ^
+                    //        (intersection 3) (intersection 4)
+                    //
+                    //  The normal algorithm will work regardless of which vertex is above another (of the two on the same side) as long as there is not the
+                    //  apex cut in the triangle.
+                    //
+                    //  If the apex cut is in the triangle face, it does matter for identify how to make new trianlges.
+                    //  because it calculates with planes (which are infinte) techincally there are also intersection below the apex cut 
+                    //  So if the method of finding intersections for this triangle is done with raycasting (like i have it), It is 
+                    //  nessassary to record each of the possible points it could be and swap which ones are used after calculations to determine which are below apex
+                    //  
+                    //  (in the above example you would need to cast from point 2 to point 1, and then back (for intersection 1 and intersection 2 respectivly)).
+                    //  But if those were below the apex, you would need to cast from point 3 to point1, and then back (for intersection 3 and intersection 4 respectivly).
+
+
 
                     //Vertex 1 and 2 on the same side
                     if (TriangleVertex1Side == TriangleVertex2Side)
@@ -590,58 +610,61 @@ namespace Assets.Scripts
                         if (VertexInsideTri)
                         {
 
-                            //Calculate and assign all possible relivant Vertex intersections with cutting planes
+                            //Calculate and assign all possible relevant Vertex intersections with cutting planes
                             //Default points
-                            intersection1 = GetRayPlaneIntersectionPointAndUv(LeftPlane, TriangleVertex1, TriangleVertexUV1, TriangleVertex3, TriangleVertexUV3, out intersection1Uv);
-                            intersection2 = GetRayPlaneIntersectionPointAndUv(RightPlane, TriangleVertex3, TriangleVertexUV3, TriangleVertex1, TriangleVertexUV1, out intersection2Uv);
+                            intersection1 = GetRayPlaneIntersectionPointAndUv( TriangleVertex1, TriangleVertexUV1, TriangleVertex3, TriangleVertexUV3, out intersection1Uv);
+                            intersection2 = GetRayPlaneIntersectionPointAndUv( TriangleVertex3, TriangleVertexUV3, TriangleVertex1, TriangleVertexUV1, out intersection2Uv);
                             //Alternate points
-                            intersection3 = GetRayPlaneIntersectionPointAndUv(LeftPlane, TriangleVertex2, TriangleVertexUV2, TriangleVertex3, TriangleVertexUV3, out intersection3Uv);
-                            intersection4 = GetRayPlaneIntersectionPointAndUv(RightPlane, TriangleVertex3, TriangleVertexUV3, TriangleVertex2, TriangleVertexUV2, out intersection4Uv);
+                            intersection3 = GetRayPlaneIntersectionPointAndUv( TriangleVertex2, TriangleVertexUV2, TriangleVertex3, TriangleVertexUV3, out intersection3Uv);
+                            intersection4 = GetRayPlaneIntersectionPointAndUv( TriangleVertex3, TriangleVertexUV3, TriangleVertex2, TriangleVertexUV2, out intersection4Uv);
 
-                            //Gets the UV of the Cut Apex
+                            //Gets the UV of the Cut Corner
                             intersectionPointUV = getMidUV(TriangleVertex1, TriangleVertexUV1, TriangleVertex2, TriangleVertexUV2, TriangleVertex3, TriangleVertexUV3, intersectionPoint);
 
-                            //if default calculation is above Apex of cut
+                            //If the first set of intersections is above the Apex of Cut
                             if (FloorPlane.GetSide(intersection1))
                             {
+                                //swap the points recorded at the end of loop
                                 SwapPoints = true;
-                                AddSideNormalAndUvs(TriangleVertex1, null, TriangleVertexUV1, intersection1, null, intersection1Uv, intersectionPoint, null, intersectionPointUV);
-                                AddSideNormalAndUvs( TriangleVertex1, null, TriangleVertexUV1, intersectionPoint, null, intersectionPointUV, TriangleVertex2, null, TriangleVertexUV2);
-                                AddSideNormalAndUvs( TriangleVertex2, null, TriangleVertexUV2, intersectionPoint, null, intersectionPointUV, TriangleVertex3, null, TriangleVertexUV3);
-                                AddSideNormalAndUvs( TriangleVertex3, null, TriangleVertexUV3, intersectionPoint, null, intersectionPointUV, intersection2, null, intersection2Uv);
+
+                                //Create appropriate triangles and add them to remainder mesh
+                                AddTrianglesNormalsAndUvs(TriangleVertex1, null, TriangleVertexUV1, intersection1, null, intersection1Uv, intersectionPoint, null, intersectionPointUV);
+                                AddTrianglesNormalsAndUvs(TriangleVertex1, null, TriangleVertexUV1, intersectionPoint, null, intersectionPointUV, TriangleVertex2, null, TriangleVertexUV2);
+                                AddTrianglesNormalsAndUvs(TriangleVertex2, null, TriangleVertexUV2, intersectionPoint, null, intersectionPointUV, TriangleVertex3, null, TriangleVertexUV3);
+                                AddTrianglesNormalsAndUvs(TriangleVertex3, null, TriangleVertexUV3, intersectionPoint, null, intersectionPointUV, intersection2, null, intersection2Uv);
                             }
                             else
                             {
-                                //Attempt to calculate Normals and UVs with interesection
-                                AddSideNormalAndUvs(TriangleVertex2, null, TriangleVertexUV2, intersection3, null, intersection3Uv, intersectionPoint, null, intersectionPointUV);
-                                AddSideNormalAndUvs( TriangleVertex2, null, TriangleVertexUV2, intersectionPoint, null, intersectionPointUV, TriangleVertex1, null, TriangleVertexUV1);
-                                AddSideNormalAndUvs( TriangleVertex1, null, TriangleVertexUV1, intersectionPoint, null, intersectionPointUV, TriangleVertex3, null, TriangleVertexUV3);
-                                AddSideNormalAndUvs( TriangleVertex3, null, TriangleVertexUV3, intersectionPoint, null, intersectionPointUV, intersection4, null, intersection4Uv);
+                                //Create appropriate triangles and add them to remainder mesh
+                                AddTrianglesNormalsAndUvs(TriangleVertex2, null, TriangleVertexUV2, intersection3, null, intersection3Uv, intersectionPoint, null, intersectionPointUV);
+                                AddTrianglesNormalsAndUvs(TriangleVertex2, null, TriangleVertexUV2, intersectionPoint, null, intersectionPointUV, TriangleVertex1, null, TriangleVertexUV1);
+                                AddTrianglesNormalsAndUvs(TriangleVertex1, null, TriangleVertexUV1, intersectionPoint, null, intersectionPointUV, TriangleVertex3, null, TriangleVertexUV3);
+                                AddTrianglesNormalsAndUvs(TriangleVertex3, null, TriangleVertexUV3, intersectionPoint, null, intersectionPointUV, intersection4, null, intersection4Uv);
                             }
 
                         }
                         //Apex of cut is not inside triangle (so either do nothing if below slice, or calculate what remains if above apex of cut)
                         else
                         {
-                                                
-                            intersection1 = GetRayPlaneIntersectionPointAndUv(LeftPlane, TriangleVertex1, TriangleVertexUV1, TriangleVertex3, TriangleVertexUV3, out intersection1Uv);
-                            intersection2 = GetRayPlaneIntersectionPointAndUv(RightPlane, TriangleVertex3, TriangleVertexUV3, TriangleVertex1, TriangleVertexUV1, out intersection2Uv);
-                            intersection3 = GetRayPlaneIntersectionPointAndUv(LeftPlane, TriangleVertex2, TriangleVertexUV2, TriangleVertex3, TriangleVertexUV3, out intersection3Uv);
-                            intersection4 = GetRayPlaneIntersectionPointAndUv(RightPlane, TriangleVertex3, TriangleVertexUV3, TriangleVertex2, TriangleVertexUV2, out intersection4Uv);
+                            //Find the intersections with the left and right slice planes         
+                            intersection1 = GetRayPlaneIntersectionPointAndUv(TriangleVertex1, TriangleVertexUV1, TriangleVertex3, TriangleVertexUV3, out intersection1Uv);
+                            intersection2 = GetRayPlaneIntersectionPointAndUv(TriangleVertex3, TriangleVertexUV3, TriangleVertex1, TriangleVertexUV1, out intersection2Uv);
+                            intersection3 = GetRayPlaneIntersectionPointAndUv(TriangleVertex2, TriangleVertexUV2, TriangleVertex3, TriangleVertexUV3, out intersection3Uv);
+                            intersection4 = GetRayPlaneIntersectionPointAndUv(TriangleVertex3, TriangleVertexUV3, TriangleVertex2, TriangleVertexUV2, out intersection4Uv);
 
                             //If all intersections with the cut planes are beneath apex of cut
                             if (AllUnderCut(true, intersection1, intersection2, intersection3, intersection4))
                             {
                                 //Add to mesh and continiue;
-                                AddSideNormalAndUvs(TriangleVertex1, TriangleVertexNormal1, TriangleVertexUV1, TriangleVertex2, TriangleVertexNormal2, TriangleVertexUV2, TriangleVertex3, TriangleVertexNormal3, TriangleVertexUV3);
+                                AddTrianglesNormalsAndUvs(TriangleVertex1, TriangleVertexNormal1, TriangleVertexUV1, TriangleVertex2, TriangleVertexNormal2, TriangleVertexUV2, TriangleVertex3, TriangleVertexNormal3, TriangleVertexUV3);
                                 continue;
                             }
                             else
                             {
                                 //Calculate remains after cut
-                                AddSideNormalAndUvs( TriangleVertex1, null, TriangleVertexUV1, intersection1, null, intersection1Uv, intersection3, null, intersection3Uv);
-                                AddSideNormalAndUvs( TriangleVertex1, null, TriangleVertexUV1, TriangleVertex2, null, TriangleVertex2, intersection3, null, intersection3Uv);
-                                AddSideNormalAndUvs( TriangleVertex3, null, TriangleVertexUV3, intersection2, null, intersection2Uv, intersection4, null, intersection4Uv);
+                                AddTrianglesNormalsAndUvs(TriangleVertex1, null, TriangleVertexUV1, intersection1, null, intersection1Uv, intersection3, null, intersection3Uv);
+                                AddTrianglesNormalsAndUvs(TriangleVertex1, null, TriangleVertexUV1, TriangleVertex2, null, TriangleVertexUV2, intersection3, null, intersection3Uv);
+                                AddTrianglesNormalsAndUvs(TriangleVertex3, null, TriangleVertexUV3, intersection2, null, intersection2Uv, intersection4, null, intersection4Uv);
                             }
 
                         }
@@ -650,107 +673,133 @@ namespace Assets.Scripts
                     //Vertex 1 and 3 are on the same side
                     else if (TriangleVertex1Side == TriangleVertex3Side)
                     {
-
+                        //if cut Apex is in Triangle
                         if (VertexInsideTri)
                         {
-                            intersection1 = GetRayPlaneIntersectionPointAndUv(LeftPlane, TriangleVertex3, TriangleVertexUV3, TriangleVertex2, TriangleVertexUV2, out intersection1Uv);
-                            intersection2 = GetRayPlaneIntersectionPointAndUv(RightPlane, TriangleVertex2, TriangleVertexUV2, TriangleVertex3, TriangleVertexUV3, out intersection2Uv);
+                            //Calculate and assign all possible relevant Vertex intersections with cutting planes
+                            //Default points
+                            intersection1 = GetRayPlaneIntersectionPointAndUv(TriangleVertex3, TriangleVertexUV3, TriangleVertex2, TriangleVertexUV2, out intersection1Uv);
+                            intersection2 = GetRayPlaneIntersectionPointAndUv(TriangleVertex2, TriangleVertexUV2, TriangleVertex3, TriangleVertexUV3, out intersection2Uv);
 
-                            intersection3 = GetRayPlaneIntersectionPointAndUv(LeftPlane, TriangleVertex1, TriangleVertexUV1, TriangleVertex2, TriangleVertexUV2, out intersection3Uv);
-                            intersection4 = GetRayPlaneIntersectionPointAndUv(RightPlane, TriangleVertex2, TriangleVertexUV2, TriangleVertex1, TriangleVertexUV1, out intersection4Uv);
+                            //Alternate points
+                            intersection3 = GetRayPlaneIntersectionPointAndUv(TriangleVertex1, TriangleVertexUV1, TriangleVertex2, TriangleVertexUV2, out intersection3Uv);
+                            intersection4 = GetRayPlaneIntersectionPointAndUv(TriangleVertex2, TriangleVertexUV2, TriangleVertex1, TriangleVertexUV1, out intersection4Uv);
 
+                            //Gets the UV of the Cut Corner
                             intersectionPointUV = getMidUV(TriangleVertex1, TriangleVertexUV1, TriangleVertex2, TriangleVertexUV2, TriangleVertex3, TriangleVertexUV3, intersectionPoint);
 
+                            //If the first set of intersections is above the Apex of Cut
                             if (FloorPlane.GetSide(intersection1))
                             {
+                                //swap the points recorded at the end of loop
                                 SwapPoints = true;
-                                AddSideNormalAndUvs(TriangleVertex3, null, TriangleVertexUV3, intersection1, null, intersection1Uv, intersectionPoint, null, intersectionPointUV);
-                                AddSideNormalAndUvs(TriangleVertex3, null, TriangleVertexUV3, intersectionPoint, null, intersectionPointUV, TriangleVertex1, null, TriangleVertexUV1);
-                                AddSideNormalAndUvs(TriangleVertex1, null, TriangleVertexUV1, intersectionPoint, null, intersectionPointUV, TriangleVertex2, null, TriangleVertexUV2);
-                                AddSideNormalAndUvs(TriangleVertex2, null, TriangleVertexUV2, intersectionPoint, null, intersectionPointUV, intersection2, null, intersection2Uv);
+
+                                //Create appropriate triangles and add them to remainder mesh
+                                AddTrianglesNormalsAndUvs(TriangleVertex3, null, TriangleVertexUV3, intersection1, null, intersection1Uv, intersectionPoint, null, intersectionPointUV);
+                                AddTrianglesNormalsAndUvs(TriangleVertex3, null, TriangleVertexUV3, intersectionPoint, null, intersectionPointUV, TriangleVertex1, null, TriangleVertexUV1);
+                                AddTrianglesNormalsAndUvs(TriangleVertex1, null, TriangleVertexUV1, intersectionPoint, null, intersectionPointUV, TriangleVertex2, null, TriangleVertexUV2);
+                                AddTrianglesNormalsAndUvs(TriangleVertex2, null, TriangleVertexUV2, intersectionPoint, null, intersectionPointUV, intersection2, null, intersection2Uv);
                             }
                             else
                             {
-                                AddSideNormalAndUvs( TriangleVertex1, null, TriangleVertexUV1, intersection3, null, intersection3Uv, intersectionPoint, null, intersectionPointUV);
-                                AddSideNormalAndUvs( TriangleVertex1, null, TriangleVertexUV1, intersectionPoint, null, intersectionPointUV, TriangleVertex3, null, TriangleVertexUV3);
-                                AddSideNormalAndUvs( TriangleVertex3, null, TriangleVertexUV3, intersectionPoint, null, intersectionPointUV, TriangleVertex2, null, TriangleVertexUV2);
-                                AddSideNormalAndUvs( TriangleVertex2, null, TriangleVertexUV2, intersectionPoint, null, intersectionPointUV, intersection4, null, intersection4Uv);
+                                //Create appropriate triangles and add them to remainder mesh
+                                AddTrianglesNormalsAndUvs( TriangleVertex1, null, TriangleVertexUV1, intersection3, null, intersection3Uv, intersectionPoint, null, intersectionPointUV);
+                                AddTrianglesNormalsAndUvs( TriangleVertex1, null, TriangleVertexUV1, intersectionPoint, null, intersectionPointUV, TriangleVertex3, null, TriangleVertexUV3);
+                                AddTrianglesNormalsAndUvs( TriangleVertex3, null, TriangleVertexUV3, intersectionPoint, null, intersectionPointUV, TriangleVertex2, null, TriangleVertexUV2);
+                                AddTrianglesNormalsAndUvs( TriangleVertex2, null, TriangleVertexUV2, intersectionPoint, null, intersectionPointUV, intersection4, null, intersection4Uv);
                             }
 
                         }
+                        //If Apex of cut is not inside triangle
                         else
-                        {                       
-                            intersection1 = GetRayPlaneIntersectionPointAndUv(LeftPlane, TriangleVertex3, TriangleVertexUV3, TriangleVertex2, TriangleVertexUV2, out intersection1Uv);
-                            intersection2 = GetRayPlaneIntersectionPointAndUv(RightPlane, TriangleVertex2, TriangleVertexUV2, TriangleVertex3, TriangleVertexUV3, out intersection2Uv);
-                            intersection3 = GetRayPlaneIntersectionPointAndUv(LeftPlane, TriangleVertex1, TriangleVertexUV1, TriangleVertex2, TriangleVertexUV2, out intersection3Uv);
-                            intersection4 = GetRayPlaneIntersectionPointAndUv(RightPlane, TriangleVertex2, TriangleVertexUV2, TriangleVertex1, TriangleVertexUV1, out intersection4Uv);
+                        {   
+                            //Find the intersections with the left and right slice planes
+                            intersection1 = GetRayPlaneIntersectionPointAndUv( TriangleVertex3, TriangleVertexUV3, TriangleVertex2, TriangleVertexUV2, out intersection1Uv);
+                            intersection2 = GetRayPlaneIntersectionPointAndUv( TriangleVertex2, TriangleVertexUV2, TriangleVertex3, TriangleVertexUV3, out intersection2Uv);
+                            intersection3 = GetRayPlaneIntersectionPointAndUv( TriangleVertex1, TriangleVertexUV1, TriangleVertex2, TriangleVertexUV2, out intersection3Uv);
+                            intersection4 = GetRayPlaneIntersectionPointAndUv( TriangleVertex2, TriangleVertexUV2, TriangleVertex1, TriangleVertexUV1, out intersection4Uv);
 
+                            //if all the intersections are below the height of the cut (they dont need to be alterned)
                             if (AllUnderCut(true, intersection1, intersection2, intersection3, intersection4))
                             {
-                                AddSideNormalAndUvs( TriangleVertex1, TriangleVertexNormal1, TriangleVertexUV1, TriangleVertex2, TriangleVertexNormal2, TriangleVertexUV2, TriangleVertex3, TriangleVertexNormal3, TriangleVertexUV3);
+                                //Add them to Remainder Mesh
+                                AddTrianglesNormalsAndUvs( TriangleVertex1, TriangleVertexNormal1, TriangleVertexUV1, TriangleVertex2, TriangleVertexNormal2, TriangleVertexUV2, TriangleVertex3, TriangleVertexNormal3, TriangleVertexUV3);
                                 continue;
                             }
                             else
                             {
-                                AddSideNormalAndUvs( TriangleVertex3, null, TriangleVertexUV3, intersection1, null, intersection1Uv, intersection3, null, intersection3Uv);
-                                AddSideNormalAndUvs( TriangleVertex3, null, TriangleVertexUV3, TriangleVertex1, null, TriangleVertex1, intersection3, null, intersection3Uv);
-                                AddSideNormalAndUvs( TriangleVertex2, null, TriangleVertexUV2, intersection2, null, intersection2Uv, intersection4, null, intersection4Uv);
+                                //Add new triangles to remainder mesh
+                                AddTrianglesNormalsAndUvs( TriangleVertex3, null, TriangleVertexUV3, intersection1, null, intersection1Uv, intersection3, null, intersection3Uv);
+                                AddTrianglesNormalsAndUvs( TriangleVertex3, null, TriangleVertexUV3, TriangleVertex1, null, TriangleVertexUV1, intersection3, null, intersection3Uv);
+                                AddTrianglesNormalsAndUvs( TriangleVertex2, null, TriangleVertexUV2, intersection2, null, intersection2Uv, intersection4, null, intersection4Uv);
                             }
-                            
-
-
                         }
 
                     }
-                    //Vertex 1 is alone
+                    //Vertex 2 and 3 are on the same side 
                     else if (TriangleVertex3Side == TriangleVertex2Side)
                     {
+                        //if cut Apex is in Triangle
                         if (VertexInsideTri)
-                        {     
-                            intersection1 = GetRayPlaneIntersectionPointAndUv(LeftPlane, TriangleVertex2, TriangleVertexUV2, TriangleVertex1, TriangleVertexUV1, out intersection1Uv);
-                            intersection2 = GetRayPlaneIntersectionPointAndUv(RightPlane, TriangleVertex1, TriangleVertexUV1, TriangleVertex2, TriangleVertexUV2, out intersection2Uv);
+                        {
+                            //Calculate and assign all possible relevant Vertex intersections with cutting planes
+                            //Default points
+                            intersection1 = GetRayPlaneIntersectionPointAndUv(TriangleVertex2, TriangleVertexUV2, TriangleVertex1, TriangleVertexUV1, out intersection1Uv);
+                            intersection2 = GetRayPlaneIntersectionPointAndUv(TriangleVertex1, TriangleVertexUV1, TriangleVertex2, TriangleVertexUV2, out intersection2Uv);
 
-                            intersection3 = GetRayPlaneIntersectionPointAndUv(RightPlane, TriangleVertex3, TriangleVertexUV3, TriangleVertex1, TriangleVertexUV1, out intersection3Uv);
-                            intersection4 = GetRayPlaneIntersectionPointAndUv(RightPlane, TriangleVertex1, TriangleVertexUV1, TriangleVertex3, TriangleVertexUV3, out intersection4Uv);
-
+                            //Alternate points
+                            intersection3 = GetRayPlaneIntersectionPointAndUv(TriangleVertex3, TriangleVertexUV3, TriangleVertex1, TriangleVertexUV1, out intersection3Uv);
+                            intersection4 = GetRayPlaneIntersectionPointAndUv(TriangleVertex1, TriangleVertexUV1, TriangleVertex3, TriangleVertexUV3, out intersection4Uv);
+                            
+                            //Gets the UV of the Cut Corner
                             intersectionPointUV = getMidUV(TriangleVertex1, TriangleVertexUV1, TriangleVertex2, TriangleVertexUV2, TriangleVertex3, TriangleVertexUV3, intersectionPoint);
 
+                            //If the first set of intersections is above the Apex of Cut
                             if (FloorPlane.GetSide(intersection1))
                             {
+                                //swap the points recorded at the end of loop
                                 SwapPoints = true;
-                                AddSideNormalAndUvs( TriangleVertex2, null, TriangleVertexUV2, intersection1, null, intersection1Uv, intersectionPoint, null, intersectionPointUV);
-                                AddSideNormalAndUvs( TriangleVertex2, null, TriangleVertexUV2, intersectionPoint, null, intersectionPointUV, TriangleVertex3, null, TriangleVertexUV3);
-                                AddSideNormalAndUvs( TriangleVertex3, null, TriangleVertexUV3, intersectionPoint, null, intersectionPointUV, TriangleVertex1, null, TriangleVertexUV1);
-                                AddSideNormalAndUvs( TriangleVertex1, null, TriangleVertexUV1, intersectionPoint, null, intersectionPointUV, intersection2, null, intersection2Uv);
+
+                                //Create appropriate triangles and add them to remainder mesh
+                                AddTrianglesNormalsAndUvs( TriangleVertex2, null, TriangleVertexUV2, intersection1, null, intersection1Uv, intersectionPoint, null, intersectionPointUV);
+                                AddTrianglesNormalsAndUvs( TriangleVertex2, null, TriangleVertexUV2, intersectionPoint, null, intersectionPointUV, TriangleVertex3, null, TriangleVertexUV3);
+                                AddTrianglesNormalsAndUvs( TriangleVertex3, null, TriangleVertexUV3, intersectionPoint, null, intersectionPointUV, TriangleVertex1, null, TriangleVertexUV1);
+                                AddTrianglesNormalsAndUvs( TriangleVertex1, null, TriangleVertexUV1, intersectionPoint, null, intersectionPointUV, intersection2, null, intersection2Uv);
                             }
                             else
                             {
-                                AddSideNormalAndUvs( TriangleVertex3, null, TriangleVertexUV3, intersection3, null, intersection3Uv, intersectionPoint, null, intersectionPointUV);
-                                AddSideNormalAndUvs( TriangleVertex3, null, TriangleVertexUV3, intersectionPoint, null, intersectionPointUV, TriangleVertex2, null, TriangleVertexUV2);
-                                AddSideNormalAndUvs( TriangleVertex2, null, TriangleVertexUV2, intersectionPoint, null, intersectionPointUV, TriangleVertex1, null, TriangleVertexUV1);
-                                AddSideNormalAndUvs( TriangleVertex1, null, TriangleVertexUV1, intersectionPoint, null, intersectionPointUV, intersection4, null, intersection4Uv);
+                                //Create appropriate triangles and add them to remainder mesh
+                                AddTrianglesNormalsAndUvs( TriangleVertex3, null, TriangleVertexUV3, intersection3, null, intersection3Uv, intersectionPoint, null, intersectionPointUV);
+                                AddTrianglesNormalsAndUvs( TriangleVertex3, null, TriangleVertexUV3, intersectionPoint, null, intersectionPointUV, TriangleVertex2, null, TriangleVertexUV2);
+                                AddTrianglesNormalsAndUvs( TriangleVertex2, null, TriangleVertexUV2, intersectionPoint, null, intersectionPointUV, TriangleVertex1, null, TriangleVertexUV1);
+                                AddTrianglesNormalsAndUvs( TriangleVertex1, null, TriangleVertexUV1, intersectionPoint, null, intersectionPointUV, intersection4, null, intersection4Uv);
                             }
 
                            
 
                         }
+                        //Apex of cut is not inside triangle (so either do nothing if below slice, or calculate what remains if above apex of cut)
                         else
-                        {                       
-                            intersection1 = GetRayPlaneIntersectionPointAndUv(LeftPlane, TriangleVertex3, TriangleVertexUV3, TriangleVertex1, TriangleVertexUV1, out intersection1Uv);
-                            intersection2 = GetRayPlaneIntersectionPointAndUv(RightPlane, TriangleVertex1, TriangleVertexUV1, TriangleVertex3, TriangleVertexUV3, out intersection2Uv);
-                            intersection3 = GetRayPlaneIntersectionPointAndUv(LeftPlane, TriangleVertex2, TriangleVertexUV2, TriangleVertex1, TriangleVertexUV1, out intersection3Uv);
-                            intersection4 = GetRayPlaneIntersectionPointAndUv(RightPlane, TriangleVertex1, TriangleVertexUV1, TriangleVertex2, TriangleVertexUV2, out intersection4Uv);
+                        {
+                            //Find the intersections with the left and right slice planes
+                            intersection1 = GetRayPlaneIntersectionPointAndUv(TriangleVertex3, TriangleVertexUV3, TriangleVertex1, TriangleVertexUV1, out intersection1Uv);
+                            intersection2 = GetRayPlaneIntersectionPointAndUv(TriangleVertex1, TriangleVertexUV1, TriangleVertex3, TriangleVertexUV3, out intersection2Uv);
+                            intersection3 = GetRayPlaneIntersectionPointAndUv(TriangleVertex2, TriangleVertexUV2, TriangleVertex1, TriangleVertexUV1, out intersection3Uv);
+                            intersection4 = GetRayPlaneIntersectionPointAndUv(TriangleVertex1, TriangleVertexUV1, TriangleVertex2, TriangleVertexUV2, out intersection4Uv);
 
-                            if(AllUnderCut(true, intersection1, intersection2, intersection3, intersection4))
-                            {                                
-                                AddSideNormalAndUvs( TriangleVertex1, TriangleVertexNormal1, TriangleVertexUV1, TriangleVertex2, TriangleVertexNormal2, TriangleVertexUV2, TriangleVertex3, TriangleVertexNormal3, TriangleVertexUV3);
+                            //If all intersections with the cut planes are beneath apex of cut
+                            if (AllUnderCut(true, intersection1, intersection2, intersection3, intersection4))
+                            {
+                                //Add to mesh and continiue;
+                                AddTrianglesNormalsAndUvs( TriangleVertex1, TriangleVertexNormal1, TriangleVertexUV1, TriangleVertex2, TriangleVertexNormal2, TriangleVertexUV2, TriangleVertex3, TriangleVertexNormal3, TriangleVertexUV3);
                                 continue;
                             }
                             else
                             {
-                                 AddSideNormalAndUvs( TriangleVertex3, null, TriangleVertexUV3, intersection1, null, intersection1Uv, intersection3, null, intersection3Uv);
-                                 AddSideNormalAndUvs( TriangleVertex3, null, TriangleVertexUV3, TriangleVertex2, null, TriangleVertexUV2, intersection3, null, intersection3Uv);
-                                 AddSideNormalAndUvs( TriangleVertex1, null, TriangleVertexUV1, intersection2, null, intersection2Uv, intersection4, null, intersection4Uv);
+                                //Add new triangles to remainder mesh
+                                AddTrianglesNormalsAndUvs(TriangleVertex3, null, TriangleVertexUV3, intersection1, null, intersection1Uv, intersection3, null, intersection3Uv);
+                                AddTrianglesNormalsAndUvs(TriangleVertex3, null, TriangleVertexUV3, TriangleVertex2, null, TriangleVertexUV2, intersection3, null, intersection3Uv);
+                                AddTrianglesNormalsAndUvs(TriangleVertex1, null, TriangleVertexUV1, intersection2, null, intersection2Uv, intersection4, null, intersection4Uv);
                             }
                            
                         }
@@ -758,53 +807,93 @@ namespace Assets.Scripts
                     }
 
 
-                    //If this triangle contains apex of cut for generating mesh of intersection along wood
-                    //Warning: this part is not perfect, I am still in the middle of Debugging a better and simpiler mesh for the cross section of the wood
-                    //This doesn't look as good as the other implimentation I am debugging, but it is more consistent
+                    //If triangle contains Apex of cut / Corner of Cut
                     if (VertexInsideTri)
                     {
+                        //If the vertexes (on the same side) are  not reversed
                         if (SwapPoints)
                         {
-                            //Backup Code notes for later:
+                            //Add the first intersection points
 
-                            //if (SlicPlane.GetSide(intersection1)) PointsOnLeftPlane.Add(intersection1);
-                            //else PointsOnRightPlane.Add(intersection1);
-                            //if (!SlicPlane.GetSide(intersection1)) PointsOnRightPlane.Add(intersection2);
-                            //else PointsOnLeftPlane.Add(intersection2);
+                            //checking  if the first pair of points are correctly rotated in relation to the slice plane (Near and far side points will automatically think
+                            //they are on the wrong side) so check and reverse them in nessesary
+                            if (SlicPlane.GetSide(intersection1))
+                            {
+                                PointsOnLeftPlane.Add(intersection1);
+                                PointsOnRightPlane.Add(intersection2);
+                            }
+                            else
+                            {
+                                PointsOnLeftPlane.Add(intersection2);
+                                PointsOnRightPlane.Add(intersection1);
+                            }
+                            
+                        }
+                        else
+                        {
+                            //If the points are flipped
 
+                            //Again check if they are on the correct side of the cut, to place them appropriately 
+                            if (SlicPlane.GetSide(intersection3))
+                            {
+                                PointsOnLeftPlane.Add(intersection3);
+                                PointsOnRightPlane.Add(intersection4);
+                            }
+                            else
+                            {
+                                PointsOnLeftPlane.Add(intersection4);
+                                PointsOnRightPlane.Add(intersection3);
+                            }
+                        }
+                        //Add verticy to the memory of cut corners
+                        CutCorners.Add(intersectionPoint);
+
+                        //Add to left and right cross section planes
+                        PointsOnLeftPlane.Add(intersectionPoint);
+                        PointsOnRightPlane.Add(intersectionPoint);
+                    }
+                    //If not part of the cut corner, but were cut
+                    else
+                    {
+                        //because all 4 intersection points are used for a full slice of triangle face, all 4 will beed to be assigned
+
+                        //Checks if the first pair are on the correct side, and if not it reverses and adds them
+                        if (SlicPlane.GetSide(intersection1))
+                        {
                             PointsOnLeftPlane.Add(intersection1);
                             PointsOnRightPlane.Add(intersection2);
                         }
                         else
                         {
-                            //Backup Code notes for later:
+                            PointsOnLeftPlane.Add(intersection2);
+                            PointsOnRightPlane.Add(intersection1);
+                        }
 
-                            //if (SlicPlane.GetSide(intersection3)) PointsOnLeftPlane.Add(intersection3);
-                            //else PointsOnRightPlane.Add(intersection3);
-                            //if (!SlicPlane.GetSide(intersection4)) PointsOnRightPlane.Add(intersection4);
-                            //else PointsOnLeftPlane.Add(intersection4);
-
+                        //Checks if the secon pair are on the correct side, and if not it reverses and adds them
+                        if (SlicPlane.GetSide(intersection3))
+                        {
                             PointsOnLeftPlane.Add(intersection3);
                             PointsOnRightPlane.Add(intersection4);
                         }
-                        PointsOnLeftPlane.Add(intersectionPoint);
-                        PointsOnRightPlane.Add(intersectionPoint);
+                        else
+                        {
+                            PointsOnLeftPlane.Add(intersection4);
+                            PointsOnRightPlane.Add(intersection3);
+                        }
+                        
                     }
-                    else
-                    {
-                        PointsOnLeftPlane.Add(intersection1);
-                        PointsOnRightPlane.Add(intersection2);
-                        PointsOnLeftPlane.Add(intersection3);
-                        PointsOnRightPlane.Add(intersection4);
-                    }
-                    
-
-
                 }
             }
-         
-            //Generate points for crossSection of mesh in cut
+
+            //Adds last points for Cross Section of mesh using memory of cut corners
+            PointsOnLeftPlane.Add(CutCorners[0]);
+            PointsOnLeftPlane.Add(CutCorners[1]);
+            PointsOnRightPlane.Add(CutCorners[0]);
+            PointsOnRightPlane.Add(CutCorners[1]);
+
+            //Generates rest of cross section
             JoinPointsAlongPlane();
+
             //Wind the meshTriangles so they are always facing outwardly
             AddReverseTriangleWinding();
         }
@@ -859,7 +948,6 @@ namespace Assets.Scripts
             //If the intersection is on the positive side of each plane it is inside the triangle
             if (TempPlane1.GetSide(intersectionPoint) && TempPlane2.GetSide(intersectionPoint) && TempPlane3.GetSide(intersectionPoint))
             {
-                Debug.Log("Found Middle");
                 return true;
             }
 
@@ -877,7 +965,6 @@ namespace Assets.Scripts
 
             //Set up raycast for intersection with tempPlane
             var direction = Mid - vertex3;
-
             edgeRay.origin = Mid;
             edgeRay.direction = direction;
 
@@ -885,15 +972,21 @@ namespace Assets.Scripts
             TempPlane1.Raycast(edgeRay, out float Tempdist);
             var edgepoint = edgeRay.GetPoint(Tempdist);
 
-            //get distance and interpolate known UV's to assist in second calculation
-            var Distance = Vector3.Distance(vertex2, edgepoint);
+            //get distance from vertex to plane intersection point
+            var DistanceFromVecTwo = Vector3.Distance(vertex2, edgepoint);
 
-            var uvtemp = InterpolateUvs(VertexUV1, VertexUV2, Distance, 1);
+            //get percentage of distance from the total distance of the side of the triangle
+            var DistancePercentage = DistanceFromVecTwo /Vector3.Distance(vertex2, vertex1);
+
+            //interpolate the UV for the distance ( to be used to interpolate once more for Midpoint Uv)
+            var uvtemp = InterpolateUvs(VertexUV1, VertexUV2, DistancePercentage, 1);
 
             //repeat process interpolating for Midpoint UV given the caluclated previous UV
-            Distance = Vector3.Distance(vertex3, edgepoint);
+            var DistanceFromVecThree = Vector3.Distance(vertex3, Mid);
+            DistancePercentage = DistanceFromVecThree / Vector3.Distance(vertex3, edgepoint);
 
-            return InterpolateUvs(VertexUV3, uvtemp, Distance, 1);
+            //Interpolate final Uv
+            return InterpolateUvs(VertexUV3, uvtemp, DistancePercentage, 1);
 
         }
 
@@ -907,9 +1000,12 @@ namespace Assets.Scripts
             var det = Vector3.Dot(Vector3.Cross(p0.normal, p1.normal), p2.normal);
             if (det < EPSILON)
             {
+                //If Error (no interseciton) try reversing plane 1 and plane 0
+
                 det = Vector3.Dot(Vector3.Cross(p1.normal, p0.normal), p2.normal);
                 if (det < EPSILON)
                 {
+                    //Not calculatable, no true intersection
                     intersectionPoint = Vector3.zero;
                     return false;
                 }
@@ -933,24 +1029,29 @@ namespace Assets.Scripts
 
 
         // Find new Veretx Point by casting a ray to find the planes intersection between 2 vertices && calculate Uv
-        private Vector3 GetRayPlaneIntersectionPointAndUv(Plane plane, Vector3 vertex1, Vector2 vertex1Uv, Vector3 vertex2, Vector2 vertex2Uv, out Vector2 uv)
+        private Vector3 GetRayPlaneIntersectionPointAndUv(Vector3 vertex1, Vector2 vertex1Uv, Vector3 vertex2, Vector2 vertex2Uv, out Vector2 uv)
         {
-            float distance = GetDistanceRelativeToPlane(plane, vertex1, vertex2, out Vector3 pointOfIntersection, out float MaxDistance);
+            //Get Distance from vertexes
+            float distance = GetDistanceRelativeToPlane(vertex1, vertex2, out Vector3 pointOfIntersection, out float MaxDistance);
+            
+            //Interpolate the Vertex UV's to find the UV at a given point (with distance)
             uv = InterpolateUvs(vertex1Uv, vertex2Uv, distance, MaxDistance);
+
             return pointOfIntersection;
         }
 
         /// Computes the distance from the slice plane
-        private float GetDistanceRelativeToPlane(Plane plane, Vector3 vertex1, Vector3 vertex2, out Vector3 pointOfintersection, out float MaxDist)
+        private float GetDistanceRelativeToPlane(Vector3 vertex1, Vector3 vertex2, out Vector3 pointOfintersection, out float MaxDist)
         {
-
+            //Set up Raycast given orgin and direction 
             edgeRay.origin = vertex1;
             edgeRay.direction = (vertex2 - vertex1).normalized;
+            
+            //Set max distance it should be allowed to go
             MaxDist = Vector3.Distance(vertex1, vertex2);
 
 
             //find whichever plane is first intersected and work from there
-            //[I am familair this might not be the most efficient way of calculating this, I plane to change this to be more effecient later]
             Plane pln;
 
             RightPlane.Raycast(edgeRay, out float Rightdist);
@@ -966,8 +1067,10 @@ namespace Assets.Scripts
                 pln = RightPlane;
             }
 
+            //if the plane does not interect raycast
             if (!pln.Raycast(edgeRay, out float dist))
             {                
+                //If the raycast is parrallel to plane
                 if (dist == 0) throw new UnityException("raycast is parallel");
 
                 throw new UnityException("raycast pointing in wrong direction");
@@ -975,6 +1078,7 @@ namespace Assets.Scripts
             }
             else if (dist > MaxDist)
             {
+                //If Distance is longer than raycast
                 Debug.Log(dist + " > " + MaxDist);
                 throw new UnityException("Intersect outside of line [new UV error code 2]");
 
@@ -988,73 +1092,65 @@ namespace Assets.Scripts
         // Attempt to find UV between 2 known vericy Uvs
         private Vector2 InterpolateUvs(Vector2 uv1, Vector2 uv2, float distance, float maxDist)
         {
+            //Get percentage of distance given the actual distance 
             distance /= maxDist;
-            //Although I know this works, Im sure I didnt have to split it into its vectors, but at the time i didnt want to change it because
-            //I was just happy it worked. This will also be looked at later by me when possible
-            Vector2 uv;
-            uv.x = Mathf.Lerp(uv1.x, uv2.x, distance);
-            uv.y = Mathf.Lerp(uv1.y, uv2.y, distance);
-            return uv;
-        }
 
-        // This was a remnent of old code for I used for slicing object, This function will be deleted and replaced in the future by me
-        private void AddSideNormalAndUvs(Vector3 vertex1, Vector3? normal1, Vector2 uv1, Vector3 vertex2, Vector3? normal2, Vector2 uv2, Vector3 vertex3, Vector3? normal3, Vector2 uv3)
-        {
-            AddTrianglesNormalsAndUvs(ref Verticies, ref Triangles, ref Normals, ref UVs, vertex1, normal1, uv1, vertex2, normal2, uv2, vertex3, normal3, uv3);
+            //interpolate UV
+            return Vector2.Lerp(uv1, uv2, distance);
         }
-
 
         // Adds the vertices to the mesh  
-        private void AddTrianglesNormalsAndUvs(ref List<Vector3> vertices, ref List<int> triangles, ref List<Vector3> normals, ref List<Vector2> uvs, Vector3 vertex1, Vector3? normal1, Vector2 uv1, Vector3 vertex2, Vector3? normal2, Vector2 uv2, Vector3 vertex3, Vector3? normal3, Vector2 uv3)
+        private void AddTrianglesNormalsAndUvs(Vector3 vertex1, Vector3? normal1, Vector2 uv1, Vector3 vertex2, Vector3? normal2, Vector2 uv2, Vector3 vertex3, Vector3? normal3, Vector2 uv3)
         {
-            ShiftTriangleIndices(ref triangles);
+            ShiftTriangleIndices();
 
-            //Compute normal if needed
+            //Compute 1st normal if needed
             if (normal1 == null) normal1 = ComputeNormal(vertex1, vertex2, vertex3);
+            
+            //Add 1st to Mesh
+            AddVertNormalUv(vertex1, (Vector3)normal1, uv1, 0);
 
-            AddVertNormalUv(ref vertices, ref normals, ref uvs, ref triangles, vertex1, (Vector3)normal1, uv1, 0);
-
+            //Compute 2nd normal if needed
             if (normal2 == null) normal2 = ComputeNormal(vertex2, vertex3, vertex1);
 
-            AddVertNormalUv(ref vertices, ref normals, ref uvs, ref triangles, vertex2, (Vector3)normal2, uv2, 1);
+            //Add 2nd to Mesh
+            AddVertNormalUv(vertex2, (Vector3)normal2, uv2, 1);
 
+            //Compute 3rd normal if needed
             if (normal3 == null) normal3 = ComputeNormal(vertex3, vertex1, vertex2);
 
-            AddVertNormalUv(ref vertices, ref normals, ref uvs, ref triangles, vertex3, (Vector3)normal3, uv3, 2);
+            //Add 3rd to Mesh
+            AddVertNormalUv(vertex3, (Vector3)normal3, uv3, 2);
         }
 
         //Shift Triangle Indices
-        private void ShiftTriangleIndices(ref List<int> triangles)
+        private void ShiftTriangleIndices()
         {
-            for (int j = 0; j < triangles.Count; j += 3)
+            for (int j = 0; j < Triangles.Count; j += 3)
             {
-                triangles[j] += 3;
-                triangles[j + 1] += 3;
-                triangles[j + 2] += 3;
+                Triangles[j] += 3;
+                Triangles[j + 1] += 3;
+                Triangles[j + 2] += 3;
             }
         }
 
         //Inserts values into specified List parameters
-        private void AddVertNormalUv(ref List<Vector3> vertices, ref List<Vector3> normals, ref List<Vector2> uvs, ref List<int> triangles, Vector3 vertex, Vector3 normal, Vector2 uv, int num)
+        private void AddVertNormalUv(Vector3 vertex, Vector3 normal, Vector2 uv, int num)
         {
-            //Reference variables are the global PS or NS attributes
-
-            vertices.Insert(num, vertex);
-            uvs.Insert(num, uv);
-            normals.Insert(num, normal);
-            triangles.Insert(num, num);
+            Verticies.Insert(num, vertex);
+            UVs.Insert(num, uv);
+            Normals.Insert(num, normal);
+            Triangles.Insert(num, num);
         }
 
         // Join the points along the plane to the Midpoint (used for crossSection of Cut
-        // WIll be replaced later by simplier and cleaner method (still in debugging process)
         private void JoinPointsAlongPlane()
         {
-
-           // Get crosssection for Left Side
+           // Create Cross Section for Left Side
 
             Vector3 Mid = GetMidPoint(true, out float Leftdistance);
 
-            //For each 2 point on the slice plane
+            //For each 2 point on the slice plane ( 2 Verticies & the midpoint will create CrossSection Triangle Faces)
             for (int i = 0; i < PointsOnLeftPlane.Count; i += 2)
             {
                 Vector3 firstVertex;
@@ -1071,16 +1167,18 @@ namespace Assets.Scripts
 
                 if (direction > 0)
                 {
-                    AddSideNormalAndUvs( Mid, -normal3, Vector2.zero, firstVertex, -normal3, Vector2.zero, secondVertex, -normal3, Vector2.zero);
+                    AddTrianglesNormalsAndUvs( Mid, -normal3, Vector2.zero, firstVertex, -normal3, Vector2.zero, secondVertex, -normal3, Vector2.zero);
 
                 }
                 else
                 {
-                    AddSideNormalAndUvs( Mid, normal3, Vector2.zero, secondVertex, normal3, Vector2.zero, firstVertex, normal3, Vector2.zero);
+                    AddTrianglesNormalsAndUvs( Mid, normal3, Vector2.zero, secondVertex, normal3, Vector2.zero, firstVertex, normal3, Vector2.zero);
                 }
             }
 
-            //Get crossSection for RightSide
+
+            //Create crossSection for RightSide ( 2 Verticies & the midpoint will create CrossSection Triangle Faces)
+
             Mid = GetMidPoint(false, out float Rightdistance);
 
             for (int i = 0; i < PointsOnRightPlane.Count; i += 2)
@@ -1099,27 +1197,30 @@ namespace Assets.Scripts
 
                 if (direction > 0)
                 {
-                    AddSideNormalAndUvs( Mid, -normal3, Vector2.zero, firstVertex, -normal3, Vector2.zero, secondVertex, -normal3, Vector2.zero);
+                    AddTrianglesNormalsAndUvs( Mid, -normal3, Vector2.zero, firstVertex, -normal3, Vector2.zero, secondVertex, -normal3, Vector2.zero);
 
                 }
                 else
                 {
-                    AddSideNormalAndUvs( Mid, normal3, Vector2.zero, secondVertex, normal3, Vector2.zero, firstVertex, normal3, Vector2.zero);
+                    AddTrianglesNormalsAndUvs( Mid, normal3, Vector2.zero, secondVertex, normal3, Vector2.zero, firstVertex, normal3, Vector2.zero);
 
                 }
             }
         }
 
-        // get the MidPoint between the first and furthest point
+        // get the MidPoint between the first and furthest point (for Cross Section)
         private Vector3 GetMidPoint(bool leftplane, out float distance)
         {
+            //Weither or not we are getting the midpoint for the Left or the Right side of the Cut
             List<Vector3> PointsOnPlane = (leftplane) ? PointsOnLeftPlane : PointsOnRightPlane;
+
             if (PointsOnPlane.Count > 0)
             {
                 Vector3 firstPoint = PointsOnPlane[0];
                 Vector3 furthestPoint = Vector3.zero;
                 distance = 0f;
 
+                //Tests Each vertex to see if it is further from the first point than the others
                 foreach (Vector3 point in PointsOnPlane)
                 {
                     //Initialize furthest point with first point
@@ -1134,10 +1235,12 @@ namespace Assets.Scripts
                     }
                 }
 
+                //Get Midpoint between First and Furthest point
                 return Vector3.Lerp(firstPoint, furthestPoint, 0.5f);
             }
             else
             {
+                //There is no points on plane (cannot compute)
                 distance = 0;
                 return Vector3.zero;
             }
@@ -1174,6 +1277,7 @@ namespace Assets.Scripts
             }
         }
 
+        //Reverses Normals
         private List<Vector3> FlipNormals(List<Vector3> currentNormals)
         {
             List<Vector3> flippedNormals = new List<Vector3>();

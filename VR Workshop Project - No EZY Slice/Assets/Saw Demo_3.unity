@@ -339,7 +339,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 45b47e3d5c06a5c478e8a9810df049ef, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  slicer: {fileID: 1140055700309003433}
+  slicer: {fileID: 0}
   cutter: {fileID: 235168642}
   saw: {fileID: 4187353191903611443}
 --- !u!54 &235168641
@@ -801,7 +801,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1208958022}
   m_LocalRotation: {x: 0, y: 0, z: 0.66261995, w: 0.7489558}
-  m_LocalPosition: {x: -1.1906485e-14, y: -0.243, z: 0.7210002}
+  m_LocalPosition: {x: -1.1906485e-14, y: -0.268, z: 0.7210002}
   m_LocalScale: {x: 0.18157, y: 0.18157, z: 0.18157}
   m_Children: []
   m_Father: {fileID: 165911663}
@@ -834,7 +834,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1301153286}
   m_LocalRotation: {x: 0, y: 0, z: -0.66261995, w: 0.7489558}
-  m_LocalPosition: {x: -0, y: -0.243, z: 0.721}
+  m_LocalPosition: {x: -0, y: -0.268, z: 0.721}
   m_LocalScale: {x: 0.18157, y: 0.18157, z: 0.18157}
   m_Children: []
   m_Father: {fileID: 165911663}
@@ -1225,7 +1225,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1755888292}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -0, y: -0.243, z: 0.721}
+  m_LocalPosition: {x: 0, y: -0.268, z: 0.721}
   m_LocalScale: {x: 0.18157, y: 0.18157, z: 0.18157}
   m_Children: []
   m_Father: {fileID: 165911663}
@@ -1581,10 +1581,8 @@ GameObject:
   - component: {fileID: 6545726654972566672}
   - component: {fileID: 8970509874586649905}
   - component: {fileID: 4702681557537395327}
-  - component: {fileID: 1140055700309003433}
   - component: {fileID: 1140055700309003434}
   - component: {fileID: 1140055700309003435}
-  - component: {fileID: 1140055700309003436}
   m_Layer: 7
   m_Name: Slice Cut
   m_TagString: Untagged
@@ -1592,25 +1590,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &1140055700309003433
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1140055700309003432}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: fb280e2d69622c44883862d573a0a452, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  MaterialAfterSlice: {fileID: 2100000, guid: 7e57d6bb6a6a1b74795062b56af48f40, type: 2}
-  sliceMask:
-    serializedVersion: 2
-    m_Bits: 64
-  saw: {fileID: 4187353191903611443}
-  isTouched: 0
-  ToBeCut: {fileID: 0}
 --- !u!54 &1140055700309003434
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -1640,18 +1619,6 @@ BoxCollider:
   serializedVersion: 2
   m_Size: {x: 10.000004, y: 0.030184997, z: 6.650479}
   m_Center: {x: 0.0000004506717, y: -0.015092541, z: 1.674747}
---- !u!114 &1140055700309003436
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1140055700309003432}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 0768fed26a65eb948a01871f89a4d18f, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!65 &2075205734303650304
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -3651,7 +3618,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 981f8956e6ba9de489e4e7dca02bf449, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  slicer: {fileID: 1140055700309003433}
+  slicer: {fileID: 0}
   sliceListener: {fileID: 235168640}
   LeftPlane: {fileID: 1301153286}
   rightPlane: {fileID: 1208958022}
@@ -3669,6 +3636,8 @@ MonoBehaviour:
   TooLowValue: 0.6
   ReduceYby: 260
   breakforce: 0.1
+  isTouched: 0
+  ToBeCut: {fileID: 0}
 --- !u!114 &4187353191903611444
 MonoBehaviour:
   m_ObjectHideFlags: 0

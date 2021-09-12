@@ -14,8 +14,8 @@ public class SliceListener : MonoBehaviour
         if (saw.ValidCut() && other.gameObject.layer == 6)
         {
             Debug.Log("Heres a cut");
-            slicer.isTouched = true;
-            slicer.ToBeCut = other.gameObject;
+            saw.isTouched = true;
+            saw.ToBeCut = other.gameObject;
 
         }
     }
@@ -24,8 +24,8 @@ public class SliceListener : MonoBehaviour
         if (saw.ValidCut() && other.gameObject.layer == 6)
         {
             Debug.Log("Heres a cut");
-            slicer.isTouched = true;
-            slicer.ToBeCut = other.gameObject;
+            saw.isTouched = true;
+            saw.ToBeCut = other.gameObject;
 
         }
     }
