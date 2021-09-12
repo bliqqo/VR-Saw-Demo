@@ -22,4 +22,4 @@
  
  I have also added sawing sounds, sawdust particles.
  
- I am working on cutting into the wood (stopping saw prematurely) leaving a slice out of the wood without splitting it. That feature is extremely close to complete, but requires a small amount more of debugging; Specifically related to its UV's; I aim to simplify the crossSection mesh very soon aswell.
+
